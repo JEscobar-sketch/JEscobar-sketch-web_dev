@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jescobar_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    image: jescobar-sketch-web_dev:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/jescobar_dev?schema=public
+      NODE_ENV: production
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./:/app
+    # CMD is defined in the Dockerfile (runs migrations, seed, then starts)
+
+volumes:
+  db_data:
